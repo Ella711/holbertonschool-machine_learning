@@ -12,14 +12,11 @@ def cat_matrices2D(mat1, mat2, axis=0):
     """ Returns the concatenation of two matrices """
     mat1copy = [row[:] for row in mat1]
     mat2copy = [row[:] for row in mat2]
-    try:
-        if axis == 0:
-            concat = mat1copy + mat2copy
-            return concat
-        if axis == 1:
-            concat = []
-            for mats in range(len(mat1copy)):
-                concat.append(mat1copy[mats] + mat2copy[mats])
-            return concat
-    except:
-        pass
+    if axis == 0 and len(mat1[0]) == len(mat2[0]):
+        concat = mat1copy + mat2copy
+        return concat
+    if axis == 1 and len(mat1) == len(mat2):
+        concat = []
+        for mats in range(len(mat1copy)):
+            concat.append(mat1copy[mats] + mat2copy[mats])
+        return concat
