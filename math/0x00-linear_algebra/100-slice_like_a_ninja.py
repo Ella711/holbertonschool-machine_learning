@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
 Function that slices a matrix along specific axes
-- axes is a dictionary where the key is an axis to slice along
-    and the value is a tuple representing the slice to make along that axis
-- You can assume that axes represents a valid slice
 """
 
 
