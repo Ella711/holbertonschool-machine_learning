@@ -10,5 +10,6 @@ def add_matrices(mat1, mat2):
     mat1, mat2 = np.array(mat1), np.array(mat2)
     if mat1.shape != mat2.shape:
         return None
-    result = mat1 + mat2
-    return result
+    else:
+        result = mat1 + mat2
+        return result
