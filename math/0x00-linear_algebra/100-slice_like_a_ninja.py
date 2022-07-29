@@ -6,12 +6,8 @@ Function that slices a matrix along specific axes
 
 def np_slice(matrix, axes={}):
     """ Slice matrix based on axis given """
-    slices = []
-    for i in range(matrix.ndim):
-        val = axes.get(i)
-        if val is not None:
-            slices.append(slice(*val))
-        else:
-            slices.append(slice(None, None, None))
-    result = matrix[slices]
+    sliced = (max(axes) + 1) * [slice(None)]
+    for k, v in axes.items():
+        sliced[k] = slice(*v)
+    result = matrix[tuple(sliced)]
     return result
