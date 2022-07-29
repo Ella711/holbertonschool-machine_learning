@@ -8,9 +8,9 @@ def np_slice(matrix, axes={}):
     """ Slice matrix based on axis given """
     slices = []
     for i in range(matrix.ndim):
-        values = axes.get(i)
-        if values is not None:
-            slices.append(slice(*values))
+        val = axes.get(i)
+        if val is not None:
+            slices.append(slice(*val))
         else:
             slices.append(slice(None, None, None))
     return matrix[(slices)]
