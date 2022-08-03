@@ -8,7 +8,7 @@ def poly_integral(poly, C=0):
     """ Returns the integral of a polynomial """
     if poly == [0]:
         return [C]
-    if type(poly) == list and len(poly) >= 1 and type(C) == int or float:
+    if type(poly) == list and len(poly) >= 1 and type(C) == int or type(C) == float:
         integral = [C]
         for i in range(1, len(poly) + 1):
             integ = poly[i - 1] / i
