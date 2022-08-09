@@ -28,6 +28,6 @@ class Exponential:
 
     def pdf(self, x):
         """ Calculates the PDF for a given time period """
-        if x > 0:
-            return self.lambtha * pow(self.e, -(x * self.lambtha))
-        return 0
+        if x < 0:
+            return 0
+        return self.lambtha * pow(self.e, -(x * self.lambtha))
