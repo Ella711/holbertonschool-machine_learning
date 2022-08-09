@@ -26,7 +26,7 @@ class Poisson:
             self.lambtha = float(lambtha)
 
     def pmf(self, k):
-        """ Calculates the value of the PMF for a given number of 'successes' """
+        """ Calculates the PMF for a given number of 'successes' """
         if type(k) is not int:
             k = int(k)
         if k < 0:
