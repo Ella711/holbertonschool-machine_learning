@@ -6,6 +6,7 @@ Contains the class Exponential that represents an exponential distribution
 
 class Exponential:
     """ Represents an exponential distribution """
+    e = 2.7182818285
 
     def __init__(self, data=None, lambtha=1.):
         """
@@ -24,3 +25,9 @@ class Exponential:
             if lambtha <= 0:
                 raise ValueError("lambtha must be a positive value")
             self.lambtha = float(lambtha)
+
+    def pdf(self, x):
+        """ Calculates the PDF for a given time period """
+        if x > 0:
+            return self.lambtha * pow(self.e, -(x * self.lambtha))
+        return 0
