@@ -4,6 +4,14 @@ Contains the class Binomial that represents a binomial distribution
 """
 
 
+def factorial(x):
+    """ Function that calculates the factorial of a given number """
+    fact = 1
+    for i in range(1, x + 1):
+        fact *= i
+    return fact
+
+
 class Binomial:
     """ Represents a normal distribution """
 
@@ -32,3 +40,11 @@ class Binomial:
                 raise ValueError("p must be greater than 0 and less than 1")
             self.n = int(n)
             self.p = float(p)
+
+    def pmf(self, k):
+        """ Calculates the PMF for a given number of 'successes' """
+        if k < 0:
+            return 0
+        k = int(k)
+        nCx = factorial(self.n) / (factorial(self.n - k) * factorial(k))
+        return nCx * pow(self.p, k) * pow(1 - self.p, self.n - k)
