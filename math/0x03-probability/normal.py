@@ -45,3 +45,14 @@ class Normal:
         numerator = pow(self.e, (-(x - self.mean) ** 2)/(2 * self.stddev ** 2))
         denominator = self.stddev * pow(2 * self.pi, 0.5)
         return numerator / denominator
+
+    def erf(self, x):
+        """ Calculates the erf of a given x-value """
+        left = 2 / self.pi**0.5
+        right = x - (x**3 / 3) + (x**5 / 10) - (x**7 / 42) + (x**9 / 216)
+        return left * right
+
+    def cdf(self, x):
+        """ Calculates the CDF of a given x-value """
+        z = (x - self.mean) / (self.stddev * (2**0.5))
+        return (self.erf(z) + 1) / 2
