@@ -48,3 +48,10 @@ class Binomial:
         k = int(k)
         nCx = factorial(self.n) / (factorial(self.n - k) * factorial(k))
         return nCx * pow(self.p, k) * pow(1 - self.p, self.n - k)
+
+    def cdf(self, k):
+        """ Calculates the CDF for a given number of 'successes' """
+        if k < 0:
+            return 0
+        k = int(k)
+        return sum(self.pmf(i) for i in range(1, k + 1))
