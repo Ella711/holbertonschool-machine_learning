@@ -54,4 +54,4 @@ class Binomial:
         if k < 0:
             return 0
         k = int(k)
-        return sum(self.pmf(i) for i in range(1, k + 1))
+        return sum(self.pmf(i) for i in range(k + 1))
