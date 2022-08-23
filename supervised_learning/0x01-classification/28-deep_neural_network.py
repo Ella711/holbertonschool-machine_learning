@@ -76,10 +76,11 @@ class DeepNeuralNetwork:
             Z = np.matmul(W, A) + b
             if layer == self.__L:
                 A = self.softmax(Z)
-            elif self.__activation == "tanh":
-                A = self.tanh(Z)
-            elif self.__activation == "sig":
-                A = self.sigmoid(Z)
+            else:
+                if self.__activation == "tanh":
+                    A = self.tanh(Z)
+                if self.__activation == "sig":
+                    A = self.sigmoid(Z)
             self.__cache["A" + str(layer)] = A
         return A, self.__cache
 
@@ -105,10 +106,11 @@ class DeepNeuralNetwork:
             A_prev = cache["A" + str(i - 1)]
             if i == self.__L:
                 dz = A - Y
-            elif self.__activation == "tanh":
-                dz = da * (1 - (A ** 2))
-            elif self.__activation == "sig":
-                dz = da * (A * (1 - A))
+            else:
+                if self.__activation == "tanh":
+                    dz = da * (1 - (A ** 2))
+                if self.__activation == "sig":
+                    dz = da * (A * (1 - A))
             dw = np.matmul(dz, A_prev.T) / m
             db = np.sum(dz, axis=1, keepdims=True) / m
             W = self.weights["W" + str(i)]
