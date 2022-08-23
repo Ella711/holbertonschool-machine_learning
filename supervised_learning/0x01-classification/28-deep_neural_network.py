@@ -78,7 +78,7 @@ class DeepNeuralNetwork:
                 A = self.softmax(Z)
             elif self.__activation == "tanh":
                 A = self.tanh(Z)
-            elif self.__activation = "sig":
+            elif self.__activation == "sig":
                 A = self.sigmoid(Z)
             self.__cache["A" + str(layer)] = A
         return A, self.__cache
