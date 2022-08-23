@@ -27,19 +27,19 @@ class DeepNeuralNetwork:
             raise ValueError("nx must be a positive integer")
         if type(layers) != list or layers == []:
             raise TypeError("layers must be a list of positive integers")
+
         self.__L = len(layers)
         self.__cache = {}
-        self.__weights = {}
-        for layer in range(self.__L):
-            if layers[layer] < 1:
+        weights = {}
+        prev_layer = nx
+        for i in range(self.L):
+            if layers[i] < 1:
                 raise TypeError("layers must be a list of positive integers")
-            if layer == 0:
-                layer_prev = nx
-            else:
-                layer_prev = layers[layer - 1]
-            self.__weights['W' + str(layer + 1)] = np.random.randn(
-                layers[layer], layer_prev) * np.sqrt(2 / layer_prev)
-            self.__weights['b' + str(layer + 1)] = np.zeros((layers[layer], 1))
+            weights["W" + str(i + 1)] = np.random.randn(
+                layers[i], prev_layer) * np.sqrt(2 / prev_layer)
+            weights["b" + str(i + 1)] = np.zeros((layers[i], 1))
+            prev_layer = layers[i]
+        self.__weights = weights
 
     @property
     def L(self):
@@ -58,48 +58,49 @@ class DeepNeuralNetwork:
 
     def forward_prop(self, X):
         """ Calculates the forward propagation of the neural network """
-        self.__cache["A0"] = X
         A = X
-        for x in range(1, self.__L + 1):
-            W = self.__weights["W" + str(x)]
-            b = self.__weights["b" + str(x)]
+        self.__cache["A0"] = X
+        for layer in range(1, self.__L + 1):
+            W = self.weights["W" + str(layer)]
+            b = self.weights["b" + str(layer)]
             Z = np.matmul(W, A) + b
-            # Softmax for last layer
-            if x == self.__L:
-                temp = np.exp(Z)
-                A = temp / np.sum(temp, axis=0, keepdims=True)
+            if layer == self.__L:
+                A_temp = np.exp(Z)
+                A = A_temp / np.sum(A_temp, axis=0, keepdims=True)
             else:
-                A = 1 / (1 + np.exp(-Z))
-            self.__cache["A" + str(x)] = A
+                A = A = 1 / (1 + np.exp(-Z))
+            self.__cache["A" + str(layer)] = A
         return A, self.__cache
 
     def cost(self, Y, A):
         """ Calculates the cost of the model using logistic regression """
-        m = -1 / Y.shape[1]
-        cost = m * np.sum(Y * np.log(A))
+        m = Y.shape[1]
+        loss = Y * np.log(A)
+        cost = (-1 / m) * np.sum(loss)
         return cost
 
     def evaluate(self, X, Y):
         """ Evaluates the neural network’s predictions """
-        A = self.forward_prop(X)[0]
+        A, cache = self.forward_prop(X)
         cost = self.cost(Y, A)
-        A = np.where(A >= 0.5, 1, 0)
-        return A, cost
+        pred = np.where(A >= 0.5, 1, 0)
+        return pred, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
         """ Calculates one pass of gradient descent on the neuron """
-        m = 1 / Y.shape[1]
+        m = Y.shape[1]
         for i in reversed(range(1, self.__L + 1)):
-            A_prev = self.__cache["A" + str(i - 1)]
-            A = self.__cache["A" + str(i)]
-            W = self.__weights["W" + str(i)]
+            A = cache["A" + str(i)]
+            A_prev = cache["A" + str(i - 1)]
             if i == self.__L:
                 dz = A - Y
             else:
                 dz = da * (A * (1 - A))
-            dw = m * np.matmul(dz, A_prev.T)
-            db = m * np.sum(dz, axis=1, keepdims=True)
+            dw = np.matmul(dz, A_prev.T) / m
+            db = np.sum(dz, axis=1, keepdims=True) / m
+            W = self.weights["W" + str(i)]
             da = np.matmul(W.T, dz)
+
             self.__weights["W" + str(i)] -= (alpha * dw)
             self.__weights["b" + str(i)] -= (alpha * db)
 
@@ -122,12 +123,13 @@ class DeepNeuralNetwork:
         costs = []
         step_array = list(range(0, iterations + 1, step))
         for i in range(iterations + 1):
-            self.forward_prop(X)
-            self.gradient_descent(Y, self.__cache, alpha)
-            cost = self.cost(Y, self.__cache['A' + str(self.__L)])
-            if verbose and (i % step == 0 or i == iterations):
+            if verbose and i in step_array:
+                pred, cost = self.evaluate(X, Y)
                 costs.append(cost)
                 print("Cost after {} iterations: {}".format(i, cost))
+            if i != iterations:
+                A, cache = self.forward_prop(X)
+                self.gradient_descent(Y, cache, alpha)
 
         if graph:
             plt.plot(step_array, costs)
@@ -135,6 +137,7 @@ class DeepNeuralNetwork:
             plt.ylabel('cost')
             plt.title('Training Cost')
             plt.show()
+
         return self.evaluate(X, Y)
 
     def save(self, filename):
