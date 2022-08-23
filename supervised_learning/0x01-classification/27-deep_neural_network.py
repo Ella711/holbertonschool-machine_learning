@@ -59,18 +59,19 @@ class DeepNeuralNetwork:
     def forward_prop(self, X):
         """ Calculates the forward propagation of the neural network """
         self.__cache["A0"] = X
+        A = X
         for x in range(1, self.__L + 1):
             W = self.__weights["W" + str(x)]
-            X = self.__cache["A" + str(x - 1)]
             b = self.__weights["b" + str(x)]
-            z = np.matmul(W, X) + b
-            if x == self.L:
-                temp = np.exp(z)
+            Z = np.matmul(W, A) + b
+            # Softmax for last layer
+            if x == self.__L:
+                temp = np.exp(Z)
                 A = temp / np.sum(temp, axis=0, keepdims=True)
             else:
-                A = 1 / (1 + np.exp((-1) * z))
+                A = 1 / (1 + np.exp(-Z))
             self.__cache["A" + str(x)] = A
-        return self.__cache["A" + str(self.__L)], self.__cache
+        return A, self.__cache
 
     def cost(self, Y, A):
         """ Calculates the cost of the model using logistic regression """
@@ -81,9 +82,9 @@ class DeepNeuralNetwork:
     def evaluate(self, X, Y):
         """ Evaluates the neural network’s predictions """
         A = self.forward_prop(X)[0]
-        pred = np.where(A >= 0.5, 1, 0)
         cost = self.cost(Y, A)
-        return pred, cost
+        A = np.where(A >= 0.5, 1, 0)
+        return A, cost
 
     def gradient_descent(self, Y, cache, alpha=0.05):
         """ Calculates one pass of gradient descent on the neuron """
