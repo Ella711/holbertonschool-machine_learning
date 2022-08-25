@@ -7,6 +7,6 @@ import tensorflow.compat.v1 as tf
 
 def create_layer(prev, n, activation):
     """ Creates a layer """
-    W = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    L = tf.keras.layers.Dense(n, activation=activation, name="layer")(prev)
+    heetal = tf.keras.initializers.VarianceScaling(mode='fan_avg')
+    L = tf.keras.layers.Dense(n, activation=activation, name="layer", kernel_initializer=heetal)(prev)
     return L
