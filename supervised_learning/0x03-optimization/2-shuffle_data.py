@@ -3,7 +3,6 @@
 2. Shuffle Data
 """
 import numpy as np
-from copy import deepcopy
 
 
 def shuffle_data(X, Y):
