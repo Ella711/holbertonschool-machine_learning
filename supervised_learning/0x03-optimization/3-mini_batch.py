@@ -3,6 +3,7 @@
 3. Mini-Batch
 """
 import tensorflow.compat.v1 as tf
+shuffle_data = __import__('2-shuffle_data').shuffle_data
 
 
 def train_mini_batch(X_train, Y_train, X_valid, Y_valid,
@@ -20,25 +21,21 @@ def train_mini_batch(X_train, Y_train, X_valid, Y_valid,
     save_path: path to where the model should be saved after training
     Returns: the path where the model was saved
     """
-    # import meta graph and restore session
-    with tf.Session() as sess:
+    with tf.Session() as sess:  # import meta graph and restore session
         saver = tf.train.import_meta_graph(load_path + ".meta")
         saver.restore(sess, load_path)
-        # load tensors and ops
-        x = tf.get_collection("x")[0]
+        x = tf.get_collection("x")[0]  # load tensors and ops
         y = tf.get_collection("y")[0]
         accuracy = tf.get_collection("accuracy")[0]
         loss = tf.get_collection("loss")[0]
         train_op = tf.get_collection("train_op")[0]
         feed_train = {x: X_train, y: Y_train}
         feed_valid = {x: X_valid, y: Y_valid}
-        # Form batch sizes
-        m = X_train.shape[0]
+        m = X_train.shape[0]  # Form batch sizes
         batches = m // batch_size
         if m % batch_size != 0:
             batches += 1
-        # loop over epochs
-        for i in range(epochs + 1):
+        for i in range(epochs + 1):  # loop over epochs
             train_cost, train_acc = sess.run([loss, accuracy], feed_train)
             valid_cost, valid_acc = sess.run([loss, accuracy], feed_valid)
             print("After {} epochs:".format(i))
@@ -47,7 +44,6 @@ def train_mini_batch(X_train, Y_train, X_valid, Y_valid,
             print("\tValidation Cost: {}".format(valid_cost))
             print("\tValidation Accuracy: {}".format(valid_acc))
             if i < epochs:
-                # shuffle data
                 x_shuffle, y_shuffle = shuffle_data(X_train, Y_train)
                 for j in range(batches):
                     start = j * batch_size
@@ -56,8 +52,7 @@ def train_mini_batch(X_train, Y_train, X_valid, Y_valid,
                     x_batch = x_shuffle[start:end]
                     y_batch = y_shuffle[start:end]
                     feed_batch = {x: x_batch, y: y_batch}
-                    # train
-                    sess.run(train_op, feed_batch)
+                    sess.run(train_op, feed_batch)  # train
                     if step % 100 == 0:
                         cost, acc = sess.run([loss, accuracy], feed_batch)
                         print("\tStep {}:".format(step))
