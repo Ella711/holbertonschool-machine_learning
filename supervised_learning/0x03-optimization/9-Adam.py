@@ -21,3 +21,9 @@ def update_variables_Adam(alpha, beta1, beta2, epsilon, var, grad, v, s, t):
     Returns: the updated variable, the new first moment, and the new
         second moment, respectively
     """
+    dwvar = beta1 * v + (1 - beta1) * grad
+    dws = beta2 * s + (1 - beta2) * np.square(grad)
+    dwvar_c = dwvar / (1 - beta1 ** t)
+    dws_c = dws / (1 - beta2 ** t)
+    var -= alpha * dwvar_c / (epsilon + np.sqrt(dws_c))
+    return var, dwvar, dws
