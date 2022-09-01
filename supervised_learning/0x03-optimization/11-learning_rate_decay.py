@@ -2,7 +2,6 @@
 """
 11. Learning Rate Decay
 """
-import numpy as np
 
 
 def learning_rate_decay(alpha, decay_rate, global_step, decay_step):
@@ -17,4 +16,4 @@ def learning_rate_decay(alpha, decay_rate, global_step, decay_step):
 
     Returns: the updated value for alpha
     """
-    return 1 / (1 + decay_rate * np.floor(global_step / decay_step)) * alpha
+    return alpha / (1 + decay_rate * (global_step // decay_step))
