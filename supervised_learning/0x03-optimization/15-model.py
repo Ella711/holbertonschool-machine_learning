@@ -45,8 +45,8 @@ def create_placeholders(nx, classes):
 def calculate_accuracy(y, y_pred):
     """ Calculates the accuracy of a prediction """
     correct_pred = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
-    mean = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-    return mean
+    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    return accuracy
 
 
 def calculate_loss(y, y_pred):
@@ -68,10 +68,10 @@ def shuffle_data(X, Y):
     Shuffles the data points in two matrices the same way
     """
     shuffle = np.random.permutation(X.shape[0])
-    return X[shuffle], Y[shuffle]
+    return X[shuffle, :], Y[shuffle]
 
 
-def create_Adam_op(loss, alpha, beta1, beta2, epsilon):
+def create_train_op(loss, alpha, beta1, beta2, epsilon):
     """
     Creates the training operation for a neural network
     in tensorflow using Adam optimization algorithm
@@ -119,40 +119,42 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
     alpha = learning_rate_decay(alpha, decay_rate, global_step, decay_steps)
 
     # initizalize train_op and add it to collection
-    train_op = create_Adam_op(loss, alpha, beta1, beta2, epsilon)
+    # hint: don't forget to add global_step parameter in optimizer().minimize()
+    train_op = create_train_op(loss, alpha, beta1, beta2, epsilon)
     tf.add_to_collection('train_op', train_op)
 
     store = tf.train.Saver()
     init = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init)
-
         m = X_train.shape[0]
         steps = m // batch_size + 1
 
-        for i in range(epochs + 1):
-            train = sess.run([loss, accuracy],
+        for epoch in range(epochs + 1):
+            train = sess.run([accuracy, loss],
                              feed_dict={x: X_train, y: Y_train})
-            valid = sess.run([loss, accuracy],
+            valid = sess.run([accuracy, loss],
                              feed_dict={x: X_valid, y: Y_valid})
 
             # print training and validation cost and accuracy
-            print("After {} epochs:".format(i))
+            print("After {} epochs:".format(epoch))
             print("\tTraining Cost: {}".format(train[0]))
             print("\tTraining Accuracy: {}".format(train[1]))
             print("\tValidation Cost: {}".format(valid[0]))
             print("\tValidation Accuracy: {}".format(valid[1]))
 
-            if i == epochs:
+            if epoch == epochs:
                 break
 
             # shuffle data
             x_shuffle, y_shuffle = shuffle_data(X_train, Y_train)
 
-            for j in range(steps):
-                start = batch_size * j
-                end = batch_size * (j + 1)
-                # get X_batch and Y_batch from shuffled trains
+            for step in range(steps):
+                start = batch_size * step
+                end = batch_size * (step + 1)
+
+                # get X_batch and Y_batch from X_train shuffled and Y_train
+                # shuffled
                 x_batch = x_shuffle[start:end]
                 y_batch = y_shuffle[start:end]
 
@@ -160,12 +162,13 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
                 sess.run(train_op, feed_dict={x: x_batch, y: y_batch})
 
                 # print batch cost and accuracy
-                if (j + 1) % 100 == 0:
-                    results = sess.run([accuracy, loss],
-                                       feed_dict={x: x_batch, y: y_batch})
-                    print("\tStep {}:".format(j + 1))
-                    print("\t\tCost: {}".format(results[0]))
-                    print("\t\tAccuracy: {}".format(results[1]))
+                if (step + 1) % 100 == 0:
+                    step_results = sess.run([accuracy, loss],
+                                            feed_dict={x: x_batch, y: y_batch})
+
+                    print("\tStep {}:".format(step + 1))
+                    print("\t\tCost: {}".format(step_results[0]))
+                    print("\t\tAccuracy: {}".format(step_results[1]))
 
             sess.run(tf.assign(global_step, global_step + 1))
 
