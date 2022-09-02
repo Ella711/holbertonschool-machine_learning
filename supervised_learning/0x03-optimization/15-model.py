@@ -10,30 +10,26 @@ def forward_prop(prev, layers, activations, epsilon):
     """
     Forward prop function with batch norm
     """
-    init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
+    initial = tf.keras.initializers.VarianceScaling(mode='fan_avg')
     layer_prev = prev
 
     for i in range(len(layers) - 1):
         densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=init)(layer_prev)
+                                       kernel_initializer=initial)(layer_prev)
 
         mean, variance = tf.nn.moments(densor, axes=[0])
 
         gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
         beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(densor,
-                                               mean=mean,
-                                               variance=variance,
-                                               offset=beta,
-                                               scale=gamma,
-                                               variance_epsilon=epsilon)
+        batch_norm = tf.nn.batch_normalization(densor, mean,
+                                               variance, beta, gamma, epsilon)
 
         layer_prev = activations[i](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=init)(layer_prev)
+                                         kernel_initializer=initial)(layer_prev)
     return output_layer
 
 
@@ -81,8 +77,8 @@ def shuffle_data(X, Y):
     """
     Shuffles the data points in two matrices the same way
     """
-    shuffle = np.random.permutation(Y.shape[0])
-    return X[shuffle, :], Y[shuffle]
+    shuffle = np.random.permutation(X.shape[0])
+    return X[shuffle], Y[shuffle]
 
 
 def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
@@ -155,8 +151,7 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
                 start = batch_size * step
                 end = batch_size * (step + 1)
 
-                # get X_batch and Y_batch from X_train shuffled and Y_train
-                # shuffled
+                # get X_batch and Y_batch from shuffled
                 x_batch = x_shuffle[start:end]
                 y_batch = y_shuffle[start:end]
 
