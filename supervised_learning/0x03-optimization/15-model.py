@@ -11,33 +11,30 @@ def forward_prop(prev, layers, activations, epsilon):
     Forward prop function with batch norm
     """
     init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    layer_prev = prev
+    prev_layer = prev
 
     for i in range(len(layers) - 1):
-        layer = tf.keras.layers.Dense(units=layers[i],
-                                      kernel_initializer=init)
+        densor = tf.keras.layers.Dense(units=layers[i],
+                                       kernel_initializer=init)(prev_layer)
 
-        mean, variance = tf.nn.moments(layer(layer_prev), axes=[0])
+        mean, variance = tf.nn.moments(densor, axes=[0])
 
         gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
         beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(layer(layer_prev),
+        batch_norm = tf.nn.batch_normalization(densor,
                                                mean=mean,
                                                variance=variance,
                                                offset=beta,
                                                scale=gamma,
                                                variance_epsilon=epsilon)
 
-        layer_prev = activations[i](batch_norm)
+        prev_layer = activations[i](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=init)
-
-    output = output_layer(layer_prev)
-
-    return output
+                                         kernel_initializer=init)(prev_layer)
+    return output_layer
 
 
 def create_placeholders(nx, classes):
@@ -172,8 +169,8 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
                         [accuracy, loss], feed_dict={x: x_batch, y: y_batch})
 
                     print("\tStep {}:".format(step + 1))
-                    print("\t\tCost: {}".format(step_accuracy))
-                    print("\t\tAccuracy: {}".format(step_cost))
+                    print("\t\tCost: {}".format(step_cost))
+                    print("\t\tAccuracy: {}".format(step_accuracy))
 
             sess.run(tf.assign(global_step, global_step + 1))
 
