@@ -11,11 +11,11 @@ def forward_prop(prev, layers, activations, epsilon):
     Forward prop function with batch norm
     """
     init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    prev_layer = prev
+    layer_prev = prev
 
     for i in range(len(layers) - 1):
         densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=init)(prev_layer)
+                                      kernel_initializer=init)(layer_prev)
 
         mean, variance = tf.nn.moments(densor, axes=[0])
 
@@ -29,32 +29,42 @@ def forward_prop(prev, layers, activations, epsilon):
                                                scale=gamma,
                                                variance_epsilon=epsilon)
 
-        prev_layer = activations[i](batch_norm)
+        layer_prev = activations[i](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=init)(prev_layer)
+                                         kernel_initializer=init)(layer_prev)
     return output_layer
 
 
 def create_placeholders(nx, classes):
     """ Returns two placeholders, x and y, for the neural network """
-    x = tf.placeholder(dtype="float32", shape=(None, nx.shape[1]), name="x")
-    y = tf.placeholder(dtype="float32", shape=(None, classes.shape[1]),
-                       name="y")
+
+    x = tf.placeholder(dtype="float32", shape=(None, nx), name="x")
+    y = tf.placeholder(dtype="float32", shape=(None, classes), name="y")
+
     return x, y
-
-
-def calculate_accuracy(y, y_pred):
-    """ Calculates the accuracy of a prediction """
-    correct_pred = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-    return accuracy
 
 
 def calculate_loss(y, y_pred):
     """ Calculates the softmax cross-entropy loss of a prediction """
     return tf.losses.softmax_cross_entropy(y, y_pred)
+
+
+def calculate_accuracy(y, y_pred):
+    """ Calculates the accuracy of a prediction """
+    correct_pred = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
+    mean = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+    return mean
+
+
+def create_train_op(loss, alpha, beta1, beta2, epsilon):
+    """
+    Creates the training operation for a neural network
+    in tensorflow using Adam optimization algorithm
+    """
+    adam = tf.train.AdamOptimizer(alpha, beta1, beta2, epsilon)
+    return adam.minimize(loss)
 
 
 def learning_rate_decay(alpha, decay_rate, global_step, decay_step):
@@ -71,26 +81,14 @@ def shuffle_data(X, Y):
     Shuffles the data points in two matrices the same way
     """
     shuffle = np.random.permutation(X.shape[0])
-    return X[shuffle, :], Y[shuffle]
-
-
-def create_train_op(loss, alpha, beta1, beta2, epsilon):
-    """
-    Creates the training operation for a neural network
-    in tensorflow using Adam optimization algorithm
-    """
-    adam = tf.train.AdamOptimizer(alpha, beta1, beta2, epsilon)
-    return adam.minimize(loss)
+    return X[shuffle], Y[shuffle]
 
 
 def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
           beta2=0.999, epsilon=1e-8, decay_rate=1, batch_size=32, epochs=5,
           save_path='/tmp/model.ckpt'):
-    """
-    Builds, trains, and saves a neural network model in
-        tensorflow using Adam optimization, mini-batch gradient
-        descent, learning rate decay, and batch normalization
-    """
+    """ Build, trains and saves a neural network classifier """
+
     # get X_train, Y_train, X_valid, and Y_valid from Data_train and Data_valid
     X_train, Y_train = Data_train
     X_valid, Y_valid = Data_valid
@@ -141,10 +139,10 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
 
             # print training and validation cost and accuracy
             print("After {} epochs:".format(epoch))
-            print("\tTraining Cost: {}".format(train_accuracy))
-            print("\tTraining Accuracy: {}".format(train_cost))
-            print("\tValidation Cost: {}".format(valid_accuracy))
-            print("\tValidation Accuracy: {}".format(valid_cost))
+            print("\tTraining Cost: {}".format(train_cost))
+            print("\tTraining Accuracy: {}".format(train_accuracy))
+            print("\tValidation Cost: {}".format(valid_cost))
+            print("\tValidation Accuracy: {}".format(valid_accuracy))
 
             if epoch == epochs:
                 break
@@ -156,7 +154,8 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
                 start = batch_size * step
                 end = batch_size * (step + 1)
 
-                # get X_batch and Y_batch from shuffled trains
+                # get X_batch and Y_batch from X_train shuffled and Y_train
+                # shuffled
                 x_batch = x_shuffle[start:end]
                 y_batch = y_shuffle[start:end]
 
@@ -171,7 +170,6 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
                     print("\tStep {}:".format(step + 1))
                     print("\t\tCost: {}".format(step_cost))
                     print("\t\tAccuracy: {}".format(step_accuracy))
-
             sess.run(tf.assign(global_step, global_step + 1))
 
         # save and return the path to where the model was saved
