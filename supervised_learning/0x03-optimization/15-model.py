@@ -81,8 +81,8 @@ def shuffle_data(X, Y):
     """
     Shuffles the data points in two matrices the same way
     """
-    shuffle = np.random.permutation(X.shape[0])
-    return X[shuffle], Y[shuffle]
+    shuffle = np.random.permutation(Y.shape[0])
+    return X[shuffle, :], Y[shuffle]
 
 
 def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
