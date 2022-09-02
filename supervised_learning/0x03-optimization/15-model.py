@@ -15,14 +15,14 @@ def forward_prop(prev, layers, activations, epsilon):
 
     for i in range(len(layers) - 1):
         densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=init)
+                                       kernel_initializer=init)(layer_prev)
 
-        mean, variance = tf.nn.moments(densor(layer_prev), axes=[0])
+        mean, variance = tf.nn.moments(densor, axes=[0])
 
         gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
         beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(densor(layer_prev),
+        batch_norm = tf.nn.batch_normalization(densor,
                                                mean=mean,
                                                variance=variance,
                                                offset=beta,
@@ -33,18 +33,16 @@ def forward_prop(prev, layers, activations, epsilon):
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=init)
-
-    NN_output = output_layer(layer_prev)
-
-    return NN_output
+                                         kernel_initializer=init)(layer_prev)
+    return output_layer
 
 
 def create_placeholders(nx, classes):
     """ Returns two placeholders, x and y, for the neural network """
 
-    x = tf.placeholder(dtype="float32", shape=(None, nx), name="x")
-    y = tf.placeholder(dtype="float32", shape=(None, classes), name="y")
+    x = tf.placeholder(dtype="float32", shape=(None, nx.shape[1]), name="x")
+    y = tf.placeholder(dtype="float32",
+                       shape=(None, classes.shape[1]), name="y")
 
     return x, y
 
