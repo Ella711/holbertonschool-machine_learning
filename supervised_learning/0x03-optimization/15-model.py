@@ -2,10 +2,8 @@
 """
 15. Put it all together and what do you get?
 """
+import numpy as np
 import tensorflow.compat.v1 as tf
-learning_rate_decay = __import__('12-learning_rate_decay').learning_rate_decay
-shuffle_data = __import__('2-shuffle_data').shuffle_data
-create_Adam_op = __import__('10-Adam').create_Adam_op
 
 
 def forward_prop(prev, layers, activations, epsilon):
@@ -54,6 +52,32 @@ def calculate_accuracy(y, y_pred):
 def calculate_loss(y, y_pred):
     """ Calculates the softmax cross-entropy loss of a prediction """
     return tf.losses.softmax_cross_entropy(y, y_pred)
+
+
+def learning_rate_decay(alpha, decay_rate, global_step, decay_step):
+    """
+    Creates a learning rate decay operation in
+        tensorflow using inverse time decay
+    """
+    return tf.train.inverse_time_decay(alpha, global_step, decay_step,
+                                       decay_rate, staircase=True)
+
+
+def shuffle_data(X, Y):
+    """
+    Shuffles the data points in two matrices the same way
+    """
+    shuffle = np.random.permutation(X.shape[0])
+    return X[shuffle], Y[shuffle]
+
+
+def create_Adam_op(loss, alpha, beta1, beta2, epsilon):
+    """
+    Creates the training operation for a neural network
+    in tensorflow using Adam optimization algorithm
+    """
+    adam = tf.train.AdamOptimizer(alpha, beta1, beta2, epsilon)
+    return adam.minimize(loss)
 
 
 def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
