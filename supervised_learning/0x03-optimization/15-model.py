@@ -11,30 +11,33 @@ def forward_prop(prev, layers, activations, epsilon):
     Forward prop function with batch norm
     """
     init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    prev_layer = prev
+    layer_prev = prev
 
     for i in range(len(layers) - 1):
-        densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=init)(prev_layer)
+        layer = tf.keras.layers.Dense(units=layers[i],
+                                      kernel_initializer=init)
 
-        mean, variance = tf.nn.moments(densor, axes=[0])
+        mean, variance = tf.nn.moments(layer(layer_prev), axes=[0])
 
         gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
         beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(densor,
+        batch_norm = tf.nn.batch_normalization(layer(layer_prev),
                                                mean=mean,
                                                variance=variance,
                                                offset=beta,
                                                scale=gamma,
                                                variance_epsilon=epsilon)
 
-        prev_layer = activations[i](batch_norm)
+        layer_prev = activations[i](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=init)(prev_layer)
-    return output_layer
+                                         kernel_initializer=init)
+
+    output = output_layer(layer_prev)
+
+    return output
 
 
 def create_placeholders(nx, classes):
