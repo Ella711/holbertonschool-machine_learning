@@ -36,9 +36,8 @@ def create_placeholders(nx, classes):
     Creates the placeholders
     """
 
-    x = tf.placeholder("float", [None, nx.shape[1]], name='x')
-    y = tf.placeholder("float", [None, classes.shape[1]], name='y')
-
+    x = tf.placeholder(dtype="float32", shape=(None, nx), name="x")
+    y = tf.placeholder(dtype="float32", shape=(None, classes), name="y")
     return x, y
 
 
@@ -47,8 +46,7 @@ def calculate_loss(y, y_pred):
     Calculates the loss of a prediction
     """
 
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=y_pred)
-
+    loss = tf.losses.softmax_cross_entropy(y, y_pred)
     return loss
 
 
