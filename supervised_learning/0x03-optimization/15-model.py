@@ -33,20 +33,14 @@ def forward_prop(prev, layers, activations, epsilon):
                                          activation=None,
                                          kernel_initializer=initializer)
 
-    NN_output = output_layer(batch_norm_outputs)
+    output = output_layer(batch_norm_outputs)
 
-    return NN_output
+    return output
 
 
 def create_placeholders(nx, classes):
     """
-        Creates the placeholders needed for the model
-        Args:
-            nx: number of input features
-            classes: number of classes
-        Returns:
-            x: placeholder for the input data
-            y: placeholder for the input labels
+    Creates the placeholders
     """
 
     x = tf.placeholder("float", [None, nx.shape[1]], name='x')
@@ -57,12 +51,7 @@ def create_placeholders(nx, classes):
 
 def calculate_loss(y, y_pred):
     """
-        Calculates the loss of a prediction
-        Args:
-            y: real labels
-            y_pred: predicted labels
-        Returns:
-            loss: loss of the prediction
+    Calculates the loss of a prediction
     """
 
     loss = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=y_pred)
@@ -72,12 +61,7 @@ def calculate_loss(y, y_pred):
 
 def calculate_accuracy(y, y_pred):
     """
-        Calculates the accuracy of a prediction
-        Args:
-            y: real labels
-            y_pred: predicted labels
-        Returns:
-            accuracy: accuracy of the prediction
+    Calculates the accuracy of a prediction
     """
 
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
@@ -87,7 +71,7 @@ def calculate_accuracy(y, y_pred):
 
 
 def create_train_op(loss, alpha, beta1, beta2, epsilon):
-    """ Creates the operation to perform the Adam optimization """
+    """ Creates the training operation using Adam optimization algorithm """
 
     adam = tf.train.AdamOptimizer(alpha, beta1, beta2, epsilon)
     return adam.minimize(loss)
