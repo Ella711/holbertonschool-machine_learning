@@ -7,6 +7,9 @@ import tensorflow.compat.v1 as tf
 
 
 def forward_prop(prev, layers, activations, epsilon):
+    """
+    Forward prop function with batch norm
+    """
     init = tf.keras.initializers.VarianceScaling(mode='fan_avg')
     prev_layer = prev
 
