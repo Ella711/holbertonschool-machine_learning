@@ -131,17 +131,17 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
         steps = m // batch_size + 1
 
         for epoch in range(epochs + 1):
-            train = sess.run([accuracy, loss],
-                             feed_dict={x: X_train, y: Y_train})
-            valid = sess.run([accuracy, loss],
-                             feed_dict={x: X_valid, y: Y_valid})
+            train_accuracy, train_cost = sess.run(
+                [accuracy, loss], feed_dict={x: X_train, y: Y_train})
+            valid_accuracy, valid_cost = sess.run(
+                [accuracy, loss], feed_dict={x: X_valid, y: Y_valid})
 
             # print training and validation cost and accuracy
             print("After {} epochs:".format(epoch))
-            print("\tTraining Cost: {}".format(train[0]))
-            print("\tTraining Accuracy: {}".format(train[1]))
-            print("\tValidation Cost: {}".format(valid[0]))
-            print("\tValidation Accuracy: {}".format(valid[1]))
+            print("\tTraining Cost: {}".format(train_accuracy))
+            print("\tTraining Accuracy: {}".format(train_cost))
+            print("\tValidation Cost: {}".format(valid_accuracy))
+            print("\tValidation Accuracy: {}".format(valid_cost))
 
             if epoch == epochs:
                 break
@@ -162,12 +162,12 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
 
                 # print batch cost and accuracy
                 if (step + 1) % 100 == 0:
-                    step_results = sess.run([accuracy, loss],
-                                            feed_dict={x: x_batch, y: y_batch})
+                    step_accuracy, step_cost = sess.run(
+                        [accuracy, loss], feed_dict={x: x_batch, y: y_batch})
 
                     print("\tStep {}:".format(step + 1))
-                    print("\t\tCost: {}".format(step_results[0]))
-                    print("\t\tAccuracy: {}".format(step_results[1]))
+                    print("\t\tCost: {}".format(step_accuracy))
+                    print("\t\tAccuracy: {}".format(step_cost))
 
             sess.run(tf.assign(global_step, global_step + 1))
 
