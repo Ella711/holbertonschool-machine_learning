@@ -9,33 +9,29 @@ import numpy as np
 def forward_prop(prev, layers, activations, epsilon):
     """ Put it all together and what do you get? """
     initializer = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    batch_norm_outputs = prev
+    layer_prev = prev
 
-    for index in range(len(layers) - 1):
-        layer = tf.keras.layers.Dense(units=layers[index],
-                                      kernel_initializer=initializer)
+    for i in range(len(layers) - 1):
+        densor = tf.keras.layers.Dense(
+            units=layers[i],
+            kernel_initializer=initializer)(layer_prev)
 
-        mean, variance = tf.nn.moments(layer(batch_norm_outputs), axes=[0])
+        mean, variance = tf.nn.moments(densor, axes=[0])
 
-        gamma = tf.Variable(tf.ones(layers[index]), trainable=True)
-        beta = tf.Variable(tf.zeros(layers[index]), trainable=True)
+        gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
+        beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(layer(batch_norm_outputs),
-                                               mean=mean,
-                                               variance=variance,
-                                               offset=beta,
-                                               scale=gamma,
-                                               variance_epsilon=epsilon)
+        batch_norm = tf.nn.batch_normalization(
+            densor, mean, variance, beta, gamma, epsilon)
 
-        batch_norm_outputs = activations[index](batch_norm)
+        layer_prev = activations[i](batch_norm)
 
-    output_layer = tf.keras.layers.Dense(layers[-1],
-                                         activation=None,
-                                         kernel_initializer=initializer)
+    output_layer = tf.keras.layers.Dense(
+        layers[-1],
+        activation=None,
+        kernel_initializer=initializer)(layer_prev)
 
-    output = output_layer(batch_norm_outputs)
-
-    return output
+    return output_layer
 
 
 def create_placeholders(nx, classes):
