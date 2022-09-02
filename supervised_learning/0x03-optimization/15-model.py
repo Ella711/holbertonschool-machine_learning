@@ -13,25 +13,22 @@ def forward_prop(prev, layers, activations, epsilon):
 
     for i in range(len(layers) - 1):
         densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=initializer)(layer_prev)
+                                       kernel_initializer=initializer)
 
-        mean, variance = tf.nn.moments(densor, axes=[0])
+        mean, variance = tf.nn.moments(densor(layer_prev), axes=[0])
 
         gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
         beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
 
         batch_norm = tf.nn.batch_normalization(
-            densor, mean, variance, beta, gamma, epsilon)
+            densor(layer_prev), mean, variance, beta, gamma, epsilon)
 
         layer_prev = activations[i](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
                                          kernel_initializer=initializer)
-
-    output = output_layer(layer_prev)
-
-    return output
+    return output_layer(layer_prev)
 
 
 def create_placeholders(nx, classes):
