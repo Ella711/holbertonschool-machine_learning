@@ -2,83 +2,109 @@
 """
 15. Put it all together and what do you get?
 """
-import numpy as np
 import tensorflow.compat.v1 as tf
+import numpy as np
 
 
 def forward_prop(prev, layers, activations, epsilon):
-    """
-    Forward prop function with batch norm
-    """
-    initial = tf.keras.initializers.VarianceScaling(mode='fan_avg')
-    layer_prev = prev
+    """ Put it all together and what do you get? """
+    initializer = tf.keras.initializers.VarianceScaling(mode='fan_avg')
+    batch_norm_outputs = prev
 
-    for i in range(len(layers) - 1):
-        densor = tf.keras.layers.Dense(units=layers[i],
-                                       kernel_initializer=initial)(layer_prev)
+    for index in range(len(layers) - 1):
+        layer = tf.keras.layers.Dense(units=layers[index],
+                                      kernel_initializer=initializer)
 
-        mean, variance = tf.nn.moments(densor, axes=[0])
+        mean, variance = tf.nn.moments(layer(batch_norm_outputs), axes=[0])
 
-        gamma = tf.Variable(tf.ones(layers[i]), trainable=True)
-        beta = tf.Variable(tf.zeros(layers[i]), trainable=True)
+        gamma = tf.Variable(tf.ones(layers[index]), trainable=True)
+        beta = tf.Variable(tf.zeros(layers[index]), trainable=True)
 
-        batch_norm = tf.nn.batch_normalization(densor, mean,
-                                               variance, beta, gamma, epsilon)
+        batch_norm = tf.nn.batch_normalization(layer(batch_norm_outputs),
+                                               mean=mean,
+                                               variance=variance,
+                                               offset=beta,
+                                               scale=gamma,
+                                               variance_epsilon=epsilon)
 
-        layer_prev = activations[i](batch_norm)
+        batch_norm_outputs = activations[index](batch_norm)
 
     output_layer = tf.keras.layers.Dense(layers[-1],
                                          activation=None,
-                                         kernel_initializer=initial)(layer_prev)
-    return output_layer
+                                         kernel_initializer=initializer)
+
+    NN_output = output_layer(batch_norm_outputs)
+
+    return NN_output
 
 
 def create_placeholders(nx, classes):
-    """ Returns two placeholders, x and y, for the neural network """
+    """
+        Creates the placeholders needed for the model
+        Args:
+            nx: number of input features
+            classes: number of classes
+        Returns:
+            x: placeholder for the input data
+            y: placeholder for the input labels
+    """
 
-    x = tf.placeholder(dtype="float32", shape=(None, nx.shape[1]), name="x")
-    y = tf.placeholder(dtype="float32",
-                       shape=(None, classes.shape[1]), name="y")
+    x = tf.placeholder("float", [None, nx.shape[1]], name='x')
+    y = tf.placeholder("float", [None, classes.shape[1]], name='y')
 
     return x, y
 
 
 def calculate_loss(y, y_pred):
-    """ Calculates the softmax cross-entropy loss of a prediction """
-    return tf.losses.softmax_cross_entropy(y, y_pred)
+    """
+        Calculates the loss of a prediction
+        Args:
+            y: real labels
+            y_pred: predicted labels
+        Returns:
+            loss: loss of the prediction
+    """
+
+    loss = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=y_pred)
+
+    return loss
 
 
 def calculate_accuracy(y, y_pred):
-    """ Calculates the accuracy of a prediction """
-    correct_pred = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
-    mean = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-    return mean
+    """
+        Calculates the accuracy of a prediction
+        Args:
+            y: real labels
+            y_pred: predicted labels
+        Returns:
+            accuracy: accuracy of the prediction
+    """
+
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_pred, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    return accuracy
 
 
 def create_train_op(loss, alpha, beta1, beta2, epsilon):
-    """
-    Creates the training operation for a neural network
-    in tensorflow using Adam optimization algorithm
-    """
+    """ Creates the operation to perform the Adam optimization """
+
     adam = tf.train.AdamOptimizer(alpha, beta1, beta2, epsilon)
     return adam.minimize(loss)
 
 
 def learning_rate_decay(alpha, decay_rate, global_step, decay_step):
-    """
-    Creates a learning rate decay operation in
-        tensorflow using inverse time decay
-    """
-    return tf.train.inverse_time_decay(alpha, global_step, decay_step,
-                                       decay_rate, staircase=True)
+    """ Creates the operation to perform the learning rate decay """
+
+    return tf.train.inverse_time_decay(
+        alpha, global_step, decay_step, decay_rate, staircase=True)
 
 
 def shuffle_data(X, Y):
-    """
-    Shuffles the data points in two matrices the same way
-    """
-    shuffle = np.random.permutation(X.shape[0])
-    return X[shuffle], Y[shuffle]
+    """ Shuffles the data """
+
+    permutation = np.random.permutation(X.shape[0])
+    return X[permutation], Y[permutation]
 
 
 def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
@@ -117,7 +143,6 @@ def model(Data_train, Data_valid, layers, activations, alpha=0.001, beta1=0.9,
     alpha = learning_rate_decay(alpha, decay_rate, global_step, decay_steps)
 
     # initizalize train_op and add it to collection
-    # hint: don't forget to add global_step parameter in optimizer().minimize()
     train_op = create_train_op(loss, alpha, beta1, beta2, epsilon)
     tf.add_to_collection('train_op', train_op)
 
