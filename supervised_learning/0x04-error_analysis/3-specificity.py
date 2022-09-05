@@ -12,7 +12,7 @@ def specificity(confusion):
     confusion: np.ndarray - shape (classes, classes) - row indices -
         correct labels and column indices - predicted labels
     classes: number of classes
-    Returns: np.ndarray - shape (classes,) - contains sensitivity of each class
+    Returns: np.ndarray - shape (classes,) - contains specificity of each class
     """
     predicted_labels = np.diagonal(confusion)
     false_neg = np.sum(confusion, axis=1) - predicted_labels
