@@ -2,8 +2,6 @@
 """
 7. Early Stopping
 """
-import tensorflow.compat.v1 as tf
-import numpy as np
 
 
 def early_stopping(cost, opt_cost, threshold, patience, count):
