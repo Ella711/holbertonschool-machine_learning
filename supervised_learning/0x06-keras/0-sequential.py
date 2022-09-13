@@ -28,7 +28,7 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
                                      kernel_regularizer=reg,
                                      input_shape=(nx,)))
         else:
-            model.add(K.layers.Dropout(rate=keep_prob))
+            model.add(K.layers.Dropout(rate=(1-keep_prob)))
             model.add(K.layers.Dense(layers[i],
                                      activation=activations[i],
                                      kernel_regularizer=reg))
