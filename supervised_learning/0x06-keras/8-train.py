@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-7. Learning Rate Decay
+8. Save Only the Best
 """
 import tensorflow.keras as K
 
@@ -34,12 +34,10 @@ def train_model(network, data, labels, batch_size, epochs,
     callback = []
     if save_best:
         callback.append(K.callbacks.ModelCheckpoint(
-            filepath=filepath, monitor="val_loss", save_best_only=True,
-            mode="min"
+            filepath=filepath, save_best_only=save_best,
         ))
 
     if validation_data:
-        callback = []
         if early_stopping:
             stop = K.callbacks.EarlyStopping(monitor="val_loss",
                                              patience=patience, mode="min")
