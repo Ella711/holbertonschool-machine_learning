@@ -37,7 +37,7 @@ def pool(images, kernel_shape, stride, mode='max'):
     pooled_image = np.zeros((m, output_h, output_w, c))
 
     if mode == "max":
-        pool_func = np.amax
+        pool_func = np.max
     else:
         pool_func = np.average
 
