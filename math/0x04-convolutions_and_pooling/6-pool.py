@@ -36,11 +36,6 @@ def pool(images, kernel_shape, stride, mode='max'):
     output_w = w // kw
     pooled_image = np.zeros((m, output_h, output_w, c))
 
-    if mode == "max":
-        pool_func = lambda n, ax: np.max(n, axis=ax)
-    else:
-        pool_func = lambda n, ax: np.average(n, ax)
-
     # Convolve
     for x in range(output_h):
         for y in range(output_w):
@@ -50,6 +45,10 @@ def pool(images, kernel_shape, stride, mode='max'):
             x1 = x0 + kh
             y0 = y * sw
             y1 = y0 + kw
-            pooled_image[:, x, y, :] = pool_func(images[:, x0:x1, y0:y1, :],
-                                                 (1, 2))
+            filter_square = images[:, x0:x1, y0:y1, :]
+            if mode == "max":
+                pool_func = np.max(filter_square, axis=(1, 2))
+            else:
+                pool_func = np.average(filter_square, axis=(1, 2))
+            pooled_image[:, x, y, :] = pool_func
     return pooled_image
