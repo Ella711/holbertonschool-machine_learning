@@ -57,13 +57,11 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     for z in range(c_new):
         for x in range(output_h):
             for y in range(output_w):
-                # start = height * stride
                 x0 = x * sh
-                # end = start + kernel/filter size
                 x1 = x0 + kh
                 y0 = y * sw
                 y1 = y0 + kw
-                conv_image[:, x, y, z] = np.sum(pad_image[:, x0:x1, y0:y1]
+                conv_image[:, x, y, z] = np.sum(pad_image[:, x0:x1, y0:y1, :]
                                                 * W[..., z],
                                                 axis=(1, 2, 3))
     Z = conv_image + b
