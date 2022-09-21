@@ -42,8 +42,8 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     sh, sw = stride
 
     if padding == "same":
-        pad_h = ((h_prev - 1) * sh + kh - h_prev) // 2
-        pad_w = ((w_prev - 1) * sw + kw - w_prev) // 2
+        pad_h = (((h_prev - 1) * sh + kh - h_prev) // 2) + 1
+        pad_w = (((w_prev - 1) * sw + kw - w_prev) // 2) + 1
     else:
         pad_h = 0
         pad_w = 0
@@ -58,22 +58,19 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                     'constant')
 
     for ex in range(m):
-        A_ex = A_pad[ex]
-        dA_ex = dA_pad[ex]
         for h in range(h_new):
+            x0 = h * sh
             for w in range(w_new):
+                y0 = w * sw
                 for c in range(c_new):
-                    x0 = h * sh
                     x1 = x0 + kh
-                    y0 = w * sw
                     y1 = y0 + kw
-
                     dZ_slice = dZ[ex, h, w, c]
-                    A_slice = A_ex[x0:x1, y0:y1, :]
-                    dA_ex[x0:x1, y0:y1] += W[:, :, :, c] * dZ_slice
-                    dW[:, :, :, c] += A_slice * dZ_slice
-        if padding == "same":
-            dA_prev[ex, :, :, :] += dA_ex[pad_h: -pad_h, pad_w: -pad_w, :]
-        else:
-            dA_prev[ex, :, :, :] += dA_ex
+                    dA_pad[ex, x0:x1, y0:y1, :] += W[:, :, :, c]\
+                                                   * dZ_slice
+                    dW[:, :, :, c] += A_pad[ex, x0:x1, y0:y1, :] * dZ_slice
+    if padding == "same":
+        dA_prev = dA_pad[:, pad_h: -pad_h, pad_w: -pad_w, :]
+    else:
+        dA_prev = dA_pad
     return dA_prev, dW, db
