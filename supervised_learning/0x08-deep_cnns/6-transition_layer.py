@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
- 5. Dense Block
+6. Transition Layer
 """
 import tensorflow.keras as K
 
