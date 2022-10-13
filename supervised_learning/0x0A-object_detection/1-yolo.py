@@ -67,7 +67,7 @@ class Yolo:
 
         for i, output in enumerate(outputs):
             output_boxes = output[..., :4]
-            grid_height, grid_width = output.shape[:2]
+            grid_height, grid_width, anchors = output.shape[:3]
 
             tx = output_boxes[..., 0]
             ty = output_boxes[..., 1]
@@ -97,8 +97,12 @@ class Yolo:
             output_boxes[..., 1] = y1
             output_boxes[..., 2] = x2
             output_boxes[..., 3] = y2
-
             boxes.append(output_boxes)
-            box_confidences.append(sigmoid(output[..., 4:5]))
+
+            confidence = sigmoid(output[..., 4])
+            confidence = confidence.reshape(grid_height, grid_width,
+                                            anchors, 1)
+            box_confidences.append(confidence)
+
             box_class_probs.append((sigmoid(output[..., 5:])))
-        return (boxes, box_confidences, box_class_probs)
+        return boxes, box_confidences, box_class_probs
