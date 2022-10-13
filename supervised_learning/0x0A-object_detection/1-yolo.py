@@ -61,27 +61,26 @@ class Yolo:
             return 1 / (1 + np.exp(-1 * array))
 
         boxes, box_confidences, box_class_probs = [], [], []
-        image_width = self.model.input.shape[1]
         image_height = self.model.input.shape[2]
+        image_width = self.model.input.shape[1]
 
         for i, output in enumerate(outputs):
             output_boxes = output[..., :4]
-            grid_height, grid_width, anchors = output.shape[:3]
+            grid_height, grid_width = output.shape[:2]
 
-            cx = np.arange(grid_width).reshape(1, grid_width)
-            cx = np.repeat(cx, grid_height, axis=0)
-            cx = np.repeat(cx[..., np.newaxis], anchors, axis=2)
-            cy = np.arange(grid_width).reshape(1, grid_width)
-            cy = np.repeat(cy, grid_height, axis=0).T
-            cy = np.repeat(cy[..., np.newaxis], anchors, axis=2)
+            cx = np.tile(np.arange(grid_width), grid_height)
+            cx = cx.reshape(grid_width, grid_width, 1)
+            cy = np.tile(np.arange(grid_height), grid_height)
+            cy = cy.reshape(grid_height, grid_height).T
+            cy = cy.reshape(grid_height, grid_height, 1)
 
             tx = output_boxes[..., 0]
             ty = output_boxes[..., 1]
             tw = output_boxes[..., 2]
             th = output_boxes[..., 3]
 
-            ph = self.anchors[i, :, 0]
-            pw = self.anchors[i, :, 1]
+            pw = self.anchors[i, :, 0]
+            ph = self.anchors[i, :, 1]
 
             bx = (sigmoid(tx) + cx) / grid_width
             by = (sigmoid(ty) + cy) / grid_height
@@ -99,6 +98,6 @@ class Yolo:
             output_boxes[..., 3] = y2
 
             boxes.append(output_boxes)
-            box_confidences.append(sigmoid(output[..., 4:5]))
+            box_confidences.append(sigmoid(output[..., 4]))
             box_class_probs.append((sigmoid(output[..., 5:])))
         return boxes, box_confidences, box_class_probs
