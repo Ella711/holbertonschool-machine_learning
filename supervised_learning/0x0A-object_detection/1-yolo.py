@@ -63,21 +63,22 @@ class Yolo:
         boxes, box_confidences, box_class_probs = [], [], []
         image_height = self.model.input.shape[2]
         image_width = self.model.input.shape[1]
+        ih, iw = image_size
 
         for i, output in enumerate(outputs):
             output_boxes = output[..., :4]
             grid_height, grid_width = output.shape[:2]
+
+            tx = output_boxes[..., 0]
+            ty = output_boxes[..., 1]
+            tw = output_boxes[..., 2]
+            th = output_boxes[..., 3]
 
             cx = np.tile(np.arange(grid_width), grid_height)
             cx = cx.reshape(grid_width, grid_width, 1)
             cy = np.tile(np.arange(grid_height), grid_height)
             cy = cy.reshape(grid_height, grid_height).T
             cy = cy.reshape(grid_height, grid_height, 1)
-
-            tx = output_boxes[..., 0]
-            ty = output_boxes[..., 1]
-            tw = output_boxes[..., 2]
-            th = output_boxes[..., 3]
 
             pw = self.anchors[i, :, 0]
             ph = self.anchors[i, :, 1]
@@ -87,10 +88,10 @@ class Yolo:
             bw = (pw * np.exp(tw)) / image_width
             bh = (ph * np.exp(th)) / image_height
 
-            x1 = (bx - (bw / 2)) * image_size[1]
-            y1 = (by - (bh / 2)) * image_size[0]
-            x2 = (bx + (bw / 2)) * image_size[1]
-            y2 = (by + (bh / 2)) * image_size[0]
+            x1 = (bx - (bw / 2)) * iw
+            y1 = (by - (bh / 2)) * ih
+            x2 = (bx + (bw / 2)) * iw
+            y2 = (by + (bh / 2)) * ih
 
             output_boxes[..., 0] = x1
             output_boxes[..., 1] = y1
@@ -100,4 +101,4 @@ class Yolo:
             boxes.append(output_boxes)
             box_confidences.append(sigmoid(output[..., 4:5]))
             box_class_probs.append((sigmoid(output[..., 5:])))
-        return boxes, box_confidences, box_class_probs
+        return (boxes, box_confidences, box_class_probs)
