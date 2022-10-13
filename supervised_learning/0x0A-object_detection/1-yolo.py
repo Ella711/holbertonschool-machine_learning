@@ -72,7 +72,7 @@ class Yolo:
             cx = np.repeat(cx, grid_height, axis=0)
             cx = np.repeat(cx[..., np.newaxis], anchors, axis=2)
             cy = np.arange(grid_width).reshape(1, grid_width)
-            cy = np.repeat(cy, grid_height, axis=0)
+            cy = np.repeat(cy, grid_height, axis=0).T
             cy = np.repeat(cy[..., np.newaxis], anchors, axis=2)
 
             tx = output_boxes[..., 0]
