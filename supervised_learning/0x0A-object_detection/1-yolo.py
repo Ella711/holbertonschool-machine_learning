@@ -39,6 +39,11 @@ class Yolo:
         self.nms_t = nms_t
         self.anchors = anchors
 
+    @staticmethod
+    def sigmoid(array):
+        """ Sigmoid activation function """
+        return 1 / (1 + np.exp(-1 * array))
+
     def process_outputs(self, outputs, image_size):
         """
         Args:
@@ -56,53 +61,49 @@ class Yolo:
 
         Returns: tuple of (boxes, box_confidences, box_class_probs)
         """
-        def sigmoid(array):
-            """ Sigmoid activation function """
-            return 1 / (1 + np.exp(-1 * array))
-
         boxes, box_confidences, box_class_probs = [], [], []
-        image_height = self.model.input.shape[2]
-        image_width = self.model.input.shape[1]
-        ih, iw = image_size
 
         for i, output in enumerate(outputs):
+            # Finding the boxes
             output_boxes = output[..., :4]
-            grid_height, grid_width, anchors = output.shape[:3]
 
-            tx = output_boxes[..., 0]
-            ty = output_boxes[..., 1]
-            tw = output_boxes[..., 2]
-            th = output_boxes[..., 3]
+            # Get grid width and height : number of grid cells
+            g_w, g_h = output.shape[:2]
 
-            cx = np.tile(np.arange(grid_width), grid_height)
-            cx = cx.reshape(grid_width, grid_width, 1)
-            cy = np.tile(np.arange(grid_height), grid_height)
-            cy = cy.reshape(grid_height, grid_height).T
-            cy = cy.reshape(grid_height, grid_height, 1)
+            # Anchor of the current output
+            anchors = self.anchors[i]
 
-            pw = self.anchors[i, :, 0]
-            ph = self.anchors[i, :, 1]
+            txy = output_boxes[..., :2]
+            twh = output_boxes[..., 2:4]
 
-            bx = (sigmoid(tx) + cx) / grid_width
-            by = (sigmoid(ty) + cy) / grid_height
-            bw = (pw * np.exp(tw)) / image_width
-            bh = (ph * np.exp(th)) / image_height
+            # Grid cell indices
+            grid = np.tile(np.indices((g_w, g_h)).T, 3)
+            grid = grid.reshape((g_h, g_w) + anchors.shape)
 
-            x1 = (bx - (bw / 2)) * iw
-            y1 = (by - (bh / 2)) * ih
-            x2 = (bx + (bw / 2)) * iw
-            y2 = (by + (bh / 2)) * ih
+            # Finding center of each bounding box per cell
+            bxy = self.sigmoid(txy) + grid
+            bwh = anchors * np.exp(twh)
 
-            output_boxes[..., 0] = x1
-            output_boxes[..., 1] = y1
-            output_boxes[..., 2] = x2
-            output_boxes[..., 3] = y2
-            boxes.append(output_boxes)
+            # Normalize bxy and bwh
+            # bwh: divide by model's input shape
+            bwh /= self.model.inputs[0].shape.as_list()[1:3]
+            # bxy: divide by the grid size
+            bxy /= [g_w, g_h]
 
-            confidence = sigmoid(output[..., 4])
-            confidence = confidence.reshape(grid_height, grid_width,
-                                            anchors, 1)
+            # Find corners
+            # Top left
+            bxy1 = bxy - (bwh / 2)
+            # Bottom right
+            bxy2 = bxy + (bwh / 2)
+
+            box = np.concatenate((bxy1, bxy2), axis=-1)
+
+            # Multiply by original image size
+            box = box * np.tile(np.flip(image_size, axis=0), 2)
+            boxes.append(box)
+
+            confidence = np.expand_dims(self.sigmoid(output[..., 4]), axis=-1)
             box_confidences.append(confidence)
 
-            box_class_probs.append((sigmoid(output[..., 5:])))
+            box_class_probs.append((self.sigmoid(output[..., 5:])))
         return boxes, box_confidences, box_class_probs
