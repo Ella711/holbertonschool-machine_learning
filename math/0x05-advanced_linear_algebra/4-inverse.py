@@ -116,7 +116,7 @@ def inverse(matrix):
 
     Returns: the inverse of matrix, or None if matrix is singular
     """
-    if not isinstance(matrix, list) or matrix == []:
+    if not isinstance(matrix, list) or matrix == [] or len(matrix) == 0:
         raise TypeError('matrix must be a list of lists')
     if any(not isinstance(row, list) for row in matrix):
         raise TypeError('matrix must be a list of lists')
