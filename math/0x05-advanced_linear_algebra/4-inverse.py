@@ -129,10 +129,4 @@ def inverse(matrix):
     if det == 0:
         return None
 
-    # det = 1 / det
-    #
-    # for row, _ in enumerate(inverse_matrix):
-    #     for col, _ in enumerate(inverse_matrix):
-    #         inverse_matrix[row][col] *= det
-
     return [[y / det for y in x] for x in inverse_matrix]
