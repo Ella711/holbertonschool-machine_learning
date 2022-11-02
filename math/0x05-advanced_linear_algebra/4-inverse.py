@@ -123,22 +123,16 @@ def inverse(matrix):
     if any(len(row) != len(matrix) for row in matrix):
         raise ValueError('matrix must be a non-empty square matrix')
 
-    if len(matrix) == 1 and len(matrix[0]) == 1:
-        return matrix[0][0]
-
-    if len(matrix) == 2 and len(matrix[0]) == 2:
-        return (matrix[0][0] * matrix[1][1]) - (matrix[0][1] * matrix[1][0])
-
     inverse_matrix = adjugate(matrix)
     det = determinant(matrix)
 
     if det == 0:
         return None
 
-    det = 1 / det
+    # det = 1 / det
+    #
+    # for row, _ in enumerate(inverse_matrix):
+    #     for col, _ in enumerate(inverse_matrix):
+    #         inverse_matrix[row][col] *= det
 
-    for row, _ in enumerate(inverse_matrix):
-        for col, _ in enumerate(inverse_matrix):
-            inverse_matrix[row][col] *= det
-
-    return inverse_matrix
+    return [[y / det for y in x] for x in inverse_matrix]
