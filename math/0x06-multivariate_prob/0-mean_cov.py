@@ -14,13 +14,12 @@ def mean_cov(X):
 
     Returns: mean, cov
     """
-    n = X.shape[0]
+    n, _ = X.shape
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         raise TypeError('X must be a 2D numpy.ndarray')
     if n < 2:
         raise ValueError("X must contain multiple data points")
 
-    mean = X.sum(axis=0) / n
-    deviation = X - mean
-    covariant = np.matmul(deviation.T, deviation)
-    return mean[np.newaxis, ...], covariant / (n - 1)
+    mean = np.mean(X, axis=0, keepdims=True)
+    cov = np.matmul((X - mean).T, (X - mean)) / (n - 1)
+    return mean, cov
