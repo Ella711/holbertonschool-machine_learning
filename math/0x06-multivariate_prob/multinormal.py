@@ -30,6 +30,10 @@ class MultiNormal:
         Calculates the mean and covariance of a data set
         """
         n, d = X.shape
+        if not isinstance(X, np.ndarray) or len(X.shape) != 2:
+            raise TypeError("data must be a 2D numpy.ndarray")
+        if n < 2:
+            raise ValueError("data must contain multiple data points")
         mean = np.mean(X, axis=0, keepdims=True)
         deviation = X - mean
         covariant = np.matmul(deviation.T, deviation)
