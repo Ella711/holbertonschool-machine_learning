@@ -16,7 +16,7 @@ def mean_cov(X):
     """
     n, _ = X.shape
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
-        raise TypeError('X must be a 2D numpy.ndarray')
+        raise TypeError("X must be a 2D numpy.ndarray")
     if n < 2:
         raise ValueError("X must contain multiple data points")
 
