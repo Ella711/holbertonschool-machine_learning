@@ -27,7 +27,7 @@ def likelihood(x, n, P):
         raise ValueError("x cannot be greater than n")
     if not isinstance(P, np.ndarray) and len(P.shape) == 1:
         raise TypeError("P must be a 1D numpy.ndarray")
-    if np.where(P > 1, 1, 0).any() or np.where(P < 0, 1, 0).any():
+    if any([True if (x > 1 or x < 0) else False for x in P]):
         raise ValueError("All values in P must be in the range [0, 1]")
 
     factorial = np.math.factorial
