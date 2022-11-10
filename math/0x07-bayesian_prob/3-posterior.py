@@ -45,4 +45,3 @@ def posterior(x, n, P, Pr):
     intersection = llhood * Pr
     marginal = np.sum(intersection)
     return intersection / marginal
-
