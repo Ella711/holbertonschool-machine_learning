@@ -25,7 +25,7 @@ def likelihood(x, n, P):
                          "or equal to 0")
     if x > n:
         raise ValueError("x cannot be greater than n")
-    if not isinstance(P, np.ndarray) and len(P.shape) != 1:
+    if not isinstance(P, np.ndarray) and len(P.shape) == 1:
         raise TypeError("P must be a 1D numpy.ndarray")
     if np.where(P > 1, 1, 0).any() or np.where(P < 0, 1, 0).any():
         raise ValueError("All values in P must be in the range [0, 1]")
