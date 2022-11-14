@@ -27,14 +27,11 @@ def kmeans(X, k, iterations=1000):
     centroids = np.random.uniform(low, high, (k, d))
 
     for i in range(iterations):
-        # Calculate distance between centroids and data points
         difference = (X - centroids[:, None, :])
         distance = np.linalg.norm(difference, axis=2).T
-        # Separate into clusters
         clss = np.argmin(distance, axis=1)
         labeled = np.concatenate((X.copy(), np.reshape(clss, (n, 1))), axis=1)
 
-        # Calculate means
         C = np.empty((k, d))
         for j in range(k):
             temp = labeled[labeled[:, -1] == j]
@@ -44,14 +41,11 @@ def kmeans(X, k, iterations=1000):
                 C[j] = re_init
             else:
                 C[j] = np.mean(temp, axis=0)
-        # Recalculate clss
         clss = np.argmin(np.linalg.norm((X - C[:, None, :]), axis=2).T, axis=1)
 
-        # Check for change
         if np.array_equal(centroids, C):
             break
 
-        # Assign new centroids
         centroids = C
 
     return C, clss
