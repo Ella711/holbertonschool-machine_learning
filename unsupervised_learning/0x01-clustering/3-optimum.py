@@ -21,10 +21,11 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
     Returns: results, d_vars, or None, None on failure
     """
-    if kmax is not None and not isinstance(kmax, int) or kmax <= 0:
+    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None
-    if not isinstance(X, np.ndarray) or not isinstance(iterations, int) or \
-            len(X.shape) != 2 or iterations <= 0:
+    if iterations <= 0 or not isinstance(iterations, int):
+        return None, None
+    if kmax is not None and not isinstance(kmax, int) or kmax <= 0:
         return None, None
     if not kmax:
         kmax = X.shape[0]
@@ -36,10 +37,13 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
     for k in range(kmin, kmax + 1):
         C, clss = kmeans(X, k, iterations)
-        results.append((C, clss))
+
         if k == kmin:
-            min = variance(X, C)
-        vars_in_k = variance(X, C)
-        d_vars.append(min - vars_in_k)
+            min_vars = variance(X, C)
+            results.append((C, clss))
+            d_vars.append(0.0)
+        vars = abs(min_vars-variance(X, C))
+        results.append((C, clss))
+        d_vars.append(vars)
 
     return results, d_vars
