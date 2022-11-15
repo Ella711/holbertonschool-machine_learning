@@ -31,18 +31,13 @@ def expectation(X, pi, m, S):
         return None, None
     if not np.isclose([np.sum(pi)], [1])[0]:
         return None, None
-    k = pi.shape[0]
-    n, d = X.shape
-    g = np.empty((k, n))
+    pdfs = np.ndarray((m.shape[0], X.shape[0]))
 
-    for i in range(k):
-        likelihood = pdf(X, m[i], S[i])
-        prior = pi[i]  # (1,)
-        intersection = prior * likelihood
-        g[i] = intersection
+    for cluster in range(m.shape[0]):
+        pdfs[cluster] = pdf(X, m[cluster], S[cluster])
 
-    marginal = np.sum(g, axis=0, keepdims=True)
-    g /= marginal
+    pdfs = pdfs * pi[:, np.newaxis]
+    pdfsum = pdfs.sum(axis=0)
+    expects = pdfs / pdfsum
 
-    log = np.sum(np.log(np.sum(marginal, axis=0)), axis=0)
-    return g, log
+    return expects, np.log(pdfsum).sum()
