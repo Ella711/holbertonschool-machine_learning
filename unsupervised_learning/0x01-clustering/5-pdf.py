@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-4. Initialize GMM
+5. PDF
 """
 import numpy as np
 

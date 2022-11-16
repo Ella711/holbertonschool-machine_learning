@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-4. Initialize GMM
+6. Expectation
 """
 import numpy as np
 pdf = __import__('5-pdf').pdf
