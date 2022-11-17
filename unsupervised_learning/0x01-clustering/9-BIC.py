@@ -11,7 +11,7 @@ def BIC(X, kmin=1, kmax=None, iterations=1000, tol=1e-5, verbose=False):
     Finds the best number of clusters for a GMM using the
         Bayesian Information Criterion
     Args:
-        X:
+        X: np.ndarray - shape (n, d) contains the dataset
         kmin: positive integer containing the minimum number
             of clusters to check
         kmax: positive integer containing the maximum number

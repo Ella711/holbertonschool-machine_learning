@@ -13,7 +13,7 @@ def expectation_maximization(X, k, iterations=1000, tol=1e-5, verbose=False):
     """
     Performs the expectation maximization for a GMM
     Args:
-        X:
+        X: np.ndarray - shape (n, d) contains the dataset
         k: positive integer containing the number of clusters
         iterations: positive integer containing the maximum
             number of iterations
