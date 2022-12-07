@@ -48,16 +48,17 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
 
     encoder = keras.Model(input_layer, [encode_mean, encode_log, Z])
     decoder = keras.Model(coded_input, decoded)
-    outputs = decoder(encoder(input_layer)[2])
+    outputs = decoder(encoder(input_layer)[-1])
     autoencoder = keras.Model(input_layer, outputs)
 
     reconstruction_loss = Loss(input_layer, outputs)
     reconstruction_loss *= input_dims
-    k1_loss = 1 + encode_log - K.square(encode_mean) - K.exp(encode_log)
-    k1_loss = K.sum(k1_loss, axis=-1)
-    k1_loss *= -0.5
-    vae_loss = K.mean(reconstruction_loss + k1_loss)
+    lat_loss = 1 + encode_log - K.square(encode_mean) - K.exp(encode_log)
+    lat_loss = K.sum(lat_loss, axis=-1)
+    lat_loss *= -0.5
+    vae_loss = K.mean(reconstruction_loss + lat_loss)
     autoencoder.add_loss(vae_loss)
     autoencoder.compile(optimizer="adam")
 
     return encoder, decoder, autoencoder
+
