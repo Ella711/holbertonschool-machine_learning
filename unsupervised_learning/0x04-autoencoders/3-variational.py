@@ -61,4 +61,3 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     autoencoder.compile(optimizer="adam")
 
     return encoder, decoder, autoencoder
-
