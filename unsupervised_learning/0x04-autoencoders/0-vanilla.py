@@ -18,23 +18,19 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     Returns: encoder, decoder, auto
     """
     k = keras.layers
-    input = keras.Input(shape=input_dims)
-    coded_input = keras.Input(shape=latent_dims)
+    input = keras.Input(shape=(input_dims,))
+    encodedl = k.Dense(hidden_layers[0], activation='relu')(input)
+    for layer in hidden_layers[1:]:
+        encodedl = k.Dense(layer, activation='relu')(encodedl)
+    encodedl = k.Dense(latent_dims, activation='relu')(encodedl)
+    encoder = keras.Model(input, encodedl)
 
-    encoded_layer = k.Dense(hidden_layers[0], activation='relu')(input)
-    for node in hidden_layers[1:]+[latent_dims]:
-        encoded_layer = k.Dense(node, activation='relu')(encoded_layer)
-
-    decoded_layer = k.Dense(
-        hidden_layers[-1], activation='relu')(coded_input)
-    for x, nodes in enumerate(list(reversed(hidden_layers[:-1])) + [input_dims]):
-        if x == len(hidden_layers) - 1:
-            decoded_layer = k.Dense(nodes, activation='sigmoid')(decoded_layer)
-        else:
-            decoded_layer = k.Dense(nodes, activation='relu')(decoded_layer)
-
-    encoder = keras.Model(input, encoded_layer)
-    decoder = keras.Model(coded_input, decoded_layer)
+    coded_input = keras.Input(shape=(latent_dims,))
+    decodedl = k.Dense(hidden_layers[-1], activation='relu')(coded_input)
+    for dim in hidden_layers[-2::-1]:
+        decodedl = k.Dense(dim, activation='relu')(decodedl)
+    decodedl = k.Dense(input_dims, activation='sigmoid')(decodedl)
+    decoder = keras.Model(coded_input, decodedl)
 
     auto = keras.Model(input, decoder(encoder(input)))
     auto.compile(loss='binary_crossentropy', optimizer='adam')
