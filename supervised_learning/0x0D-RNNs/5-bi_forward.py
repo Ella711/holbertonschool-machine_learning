@@ -20,7 +20,7 @@ class BidirectionalCell:
         """
         self.Whf = np.random.randn(i + h, h)
         self.Whb = np.random.randn(i + h, h)
-        self.Wy = np.random.randn(h, o)
+        self.Wy = np.random.randn(h * 2, o)
 
         self.bhf = np.zeros((1, h))
         self.bhb = np.zeros((1, h))
