@@ -26,7 +26,7 @@ def word2vec_model(sentences, size=100, min_count=5, window=5,
     model = Word2Vec(
         sentences=sentences, min_count=min_count, window=window,
         negative=negative, workers=workers, seed=seed,
-        sg=(not cbow))
+        sg=(not cbow), size=size)
 
     model.train(
         sentences, epochs=iterations,
