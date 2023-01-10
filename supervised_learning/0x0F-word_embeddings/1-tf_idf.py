@@ -16,6 +16,6 @@ def tf_idf(sentences, vocab=None):
     """
     count_vector = TfidfVectorizer(vocabulary=vocab)
     embeddings = count_vector.fit_transform(sentences).toarray()
-    features = count_vector.get_feature_names_out()
+    features = count_vector.get_feature_names()
 
     return embeddings, features
