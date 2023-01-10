@@ -16,7 +16,8 @@ def bag_of_words(sentences, vocab=None):
     Returns: embeddings, features
     """
     count_vector = CountVectorizer(vocabulary=vocab)
-    embeddings = count_vector.fit_transform(sentences).toarray()
+    embeds = count_vector.fit_transform(sentences)
     features = count_vector.get_feature_names_out()
+    embeddings = embeds.toarray()
 
     return embeddings, features
